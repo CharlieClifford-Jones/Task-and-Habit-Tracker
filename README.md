@@ -1,6 +1,7 @@
 Task and Habit Tracker
 
 Overview:
+
 This project is a Task and Habit Tracker built as a Single Page Application (SPA) using HTML, CSS and JavaScript.
 
 The aim of the application is to help users stay organised by allowing them to add tasks and habits, and track whether they have been completed or not.
