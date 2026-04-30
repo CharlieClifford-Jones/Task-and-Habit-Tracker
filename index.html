@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task and Habit Tracker</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f2ff;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .titleBox {
+            border: 1px solid #555;
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        .saveBox {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 260px;
+            border: 1px solid #777;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: white;
+        }
+
+        .mainLayout {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .examples {
+            width: 180px;
+            background-color: white;
+            border: 1px solid #777;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .container, .results {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+        }
+
+        .box {
+            width: 420px;
+            min-height: 180px;
+            border: 1px solid #777;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            background-color: white;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+
+        button {
+            padding: 5px 12px;
+            margin: 4px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+            background-color: #f0f0f0;
+            font-size: 13px;
+        }
+
+        .item {
+            background-color: #f5f5f5;
+            margin-top: 12px;
+            padding: 14px 45px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .itemText {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .green {
+            background-color: #4dff4d;
+        }
+
+        .red {
+            background-color: #ff4d4d;
+        }
+
+        .deleteX {
+            position: absolute;
+            top: 2px;
+            right: 6px;
+            border: none;
+            background: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body onload="loadData()">
+
+<div class="titleBox">
+    <h1>Task and Habit Tracker</h1>
+</div>
+
+<div class="saveBox">
+    <h2>Save / Load Data</h2>
+    <button onclick="exportJSON()">Export JSON</button>
+    <input type="file" id="jsonFile" accept=".json">
+    <button onclick="importJSON()">Import JSON</button>
+</div>
+
+<div class="mainLayout">
+
+    <div class="examples">
+        <h3>Example Tasks</h3>
+        <button onclick="addExampleTask('Clean room')">Clean room</button>
+        <button onclick="addExampleTask('Do recycling')">Do recycling</button>
+        <button onclick="addExampleTask('Buy groceries')">Buy groceries</button>
+        <button onclick="addExampleTask('Submit coursework')">Submit coursework</button>
+    </div>
+
+    <div>
+        <div class="container">
+
+            <div class="box">
+                <h2>Tasks for Today</h2>
+                <input type="text" id="taskInput">
+                <button onclick="addTask()">Add Task</button>
+                <div id="taskList"></div>
+            </div>
+
+            <div class="box">
+                <h2>Daily Habits</h2>
+                <input type="text" id="habitInput">
+                <button onclick="addHabit()">Add Habit</button>
+                <div id="habitList"></div>
+            </div>
+
+        </div>
+
+        <div class="results">
+
+            <div>
+                <div class="box">
+                    <h2>Completed Tasks</h2>
+                    <div id="completedTasks"></div>
+                </div>
+
+                <div class="box">
+                    <h2>Incomplete Tasks</h2>
+                    <div id="incompleteTasks"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="box">
+                    <h2>Habits Kept Up</h2>
+                    <div id="habitsKept"></div>
+                </div>
+
+                <div class="box">
+                    <h2>Habits Broken</h2>
+                    <div id="habitsBroken"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="examples">
+        <h3>Example Habits</h3>
+        <button onclick="addExampleHabit('Get 8 hours of sleep every night')">Sleep 8 hours</button>
+        <button onclick="addExampleHabit('Exercise daily')">Exercise daily</button>
+        <button onclick="addExampleHabit('No junk food')">No junk food</button>
+        <button onclick="addExampleHabit('Quit smoking')">Quit smoking</button>
+    </div>
+
+</div>
+
+<script>
+
+// gets what user typed and adds it as a task
+function addTask() {
+    let input = document.getElementById("taskInput");
+
+    if (input.value == "") {
+        return; // stops empty tasks being added
+    }
+
+    addTaskBox(input.value); // makes the task box
+    input.value = ""; // clears the input after adding
+    saveData(); // saves so it stays after refresh
+}
+
+// same as task but for habits
+function addHabit() {
+    let input = document.getElementById("habitInput");
+
+    if (input.value == "") {
+        return;
+    }
+
+    addHabitBox(input.value);
+    input.value = "";
+    saveData();
+}
+
+// example buttons add ready made tasks
+function addExampleTask(text) {
+    addTaskBox(text);
+    saveData();
+}
+
+// example buttons add ready made habits
+function addExampleHabit(text) {
+    addHabitBox(text);
+    saveData();
+}
+
+// creates the task box with the task text and buttons inside
+function addTaskBox(text) {
+    let item = document.createElement("div");
+    item.className = "item";
+
+    item.innerHTML =
+        '<button onclick="moveTaskComplete(this)">Complete</button>' +
+        '<span class="itemText">' + text + '</span>' +
+        '<button onclick="moveTaskIncomplete(this)">Incomplete</button>' +
+        '<button class="deleteX" onclick="deleteItem(this)">x</button>';
+
+    document.getElementById("taskList").appendChild(item);
+}
+
+// creates the habit box with the habit text and buttons inside
+function addHabitBox(text) {
+    let item = document.createElement("div");
+    item.className = "item";
+
+    item.innerHTML =
+        '<button onclick="moveHabitKept(this)">Kept Up</button>' +
+        '<span class="itemText">' + text + '</span>' +
+        '<button onclick="moveHabitBroken(this)">Broken</button>' +
+        '<button class="deleteX" onclick="deleteItem(this)">x</button>';
+
+    document.getElementById("habitList").appendChild(item);
+}
+
+// moves task to completed box and turns it green
+function moveTaskComplete(button) {
+    let item = button.parentElement;
+    let text = item.querySelector(".itemText").innerText;
+
+    item.className = "item green";
+
+    item.innerHTML =
+        '<button onclick="moveBackTask(this)">Move Back</button>' +
+        '<span class="itemText">' + text + '</span>' +
+        '<button class="deleteX" onclick="deleteItem(this)">x</button>';
+
+    document.getElementById("completedTasks").appendChild(item);
+    saveData();
+}
+
+// moves task to incomplete box and turns it red
+function moveTaskIncomplete(button) {
+    let item = button.parentElement;
+    let text = item.querySelector(".itemText").innerText;
+
+    item.className = "item red";
+
+    item.innerHTML =
+        '<button onclick="moveBackTask(this)">Move Back</button>' +
+        '<span class="itemText">' + text + '</span>' +
+        '<button class="deleteX" onclick="deleteItem(this)">x</button>';
+
+    document.getElementById("incompleteTasks").appendChild(item);
+    saveData();
+}
+
+// moves habit to kept up box and turns it green
+function moveHabitKept(button) {
+    let item = button.parentElement;
+    let text = item.querySelector(".itemText").innerText;
+
+    item.className = "item green";
+
+    item.innerHTML =
+        '<button onclick="moveBackHabit(this)">Move Back</button>' +
+        '<span class="itemText">' + text + '</span>' +
+        '<button class="deleteX" onclick="deleteItem(this)">x</button>';
+
+    document.getElementById("habitsKept").appendChild(item);
+    saveData();
+}
+
+// moves habit to broken box and turns it red
+function moveHabitBroken(button) {
+    let item = button.parentElement;
+    let text = item.querySelector(".itemText").innerText;
+
+    item.className = "item red";
+
+    item.innerHTML =
+        '<button onclick="moveBackHabit(this)">Move Back</button>' +
+        '<span class="itemText">' + text + '</span>' +
+        '<button class="deleteX" onclick="deleteItem(this)">x</button>';
+
+    document.getElementById("habitsBroken").appendChild(item);
+    saveData();
+}
+
+// moves task back to the main task list
+function moveBackTask(button) {
+    let item = button.parentElement;
+    let text = item.querySelector(".itemText").innerText;
+
+    item.remove();
+    addTaskBox(text);
+    saveData();
+}
+
+// moves habit back to the main habit list
+function moveBackHabit(button) {
+    let item = button.parentElement;
+    let text = item.querySelector(".itemText").innerText;
+
+    item.remove();
+    addHabitBox(text);
+    saveData();
+}
+
+// deletes the whole item
+function deleteItem(button) {
+    button.parentElement.remove();
+    saveData();
+}
+
+// saves all boxes in the browser
+function saveData() {
+    localStorage.setItem("taskList", document.getElementById("taskList").innerHTML);
+    localStorage.setItem("habitList", document.getElementById("habitList").innerHTML);
+    localStorage.setItem("completedTasks", document.getElementById("completedTasks").innerHTML);
+    localStorage.setItem("incompleteTasks", document.getElementById("incompleteTasks").innerHTML);
+    localStorage.setItem("habitsKept", document.getElementById("habitsKept").innerHTML);
+    localStorage.setItem("habitsBroken", document.getElementById("habitsBroken").innerHTML);
+}
+
+// loads saved boxes when the page opens
+function loadData() {
+    document.getElementById("taskList").innerHTML = localStorage.getItem("taskList") || "";
+    document.getElementById("habitList").innerHTML = localStorage.getItem("habitList") || "";
+    document.getElementById("completedTasks").innerHTML = localStorage.getItem("completedTasks") || "";
+    document.getElementById("incompleteTasks").innerHTML = localStorage.getItem("incompleteTasks") || "";
+    document.getElementById("habitsKept").innerHTML = localStorage.getItem("habitsKept") || "";
+    document.getElementById("habitsBroken").innerHTML = localStorage.getItem("habitsBroken") || "";
+}
+
+// exports the current boxes into a JSON file
+function exportJSON() {
+    let data = {
+        taskList: document.getElementById("taskList").innerHTML,
+        habitList: document.getElementById("habitList").innerHTML,
+        completedTasks: document.getElementById("completedTasks").innerHTML,
+        incompleteTasks: document.getElementById("incompleteTasks").innerHTML,
+        habitsKept: document.getElementById("habitsKept").innerHTML,
+        habitsBroken: document.getElementById("habitsBroken").innerHTML
+    };
+
+    let jsonText = JSON.stringify(data); // turns the data into JSON text
+    let file = new Blob([jsonText], {type: "application/json"}); // creates the JSON file
+    let link = document.createElement("a"); // makes a temporary link so it can download
+
+    link.href = URL.createObjectURL(file);
+    link.download = "task-habit-data.json";
+    link.click();
+}
+
+// imports the JSON file and puts the boxes back
+function importJSON() {
+    let file = document.getElementById("jsonFile").files[0];
+
+    if (!file) {
+        return;
+    }
+
+    let reader = new FileReader(); // reads the selected file
+
+    reader.onload = function(event) {
+        let data = JSON.parse(event.target.result); // changes JSON text back into data
+
+        document.getElementById("taskList").innerHTML = data.taskList;
+        document.getElementById("habitList").innerHTML = data.habitList;
+        document.getElementById("completedTasks").innerHTML = data.completedTasks;
+        document.getElementById("incompleteTasks").innerHTML = data.incompleteTasks;
+        document.getElementById("habitsKept").innerHTML = data.habitsKept;
+        document.getElementById("habitsBroken").innerHTML = data.habitsBroken;
+
+        saveData();
+    };
+
+    reader.readAsText(file);
+}
+
+</script>
+
+</body>
+</html>
